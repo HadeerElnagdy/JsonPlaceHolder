@@ -12,6 +12,7 @@ import RxCocoa
 protocol ProfileViewModelProtocol {
     var userInfo: Driver<(name: String, address: String)> { get }
     var albums: Driver<[String]> { get }
+    var albumIds: Driver<[Int]> { get }
     var isLoading: Driver<Bool> { get }
     func loadProfile()
 }
@@ -28,9 +29,11 @@ final class ProfileViewModel: ProfileViewModelProtocol {
         value: ("", "")
     )
     private let albumsRelay = BehaviorRelay<[String]>(value: [])
+    private let albumIdsRelay = BehaviorRelay<[Int]>(value: [])
     
     var userInfo: Driver<(name: String, address: String)> { userInfoRelay.asDriver() }
     var albums: Driver<[String]> { albumsRelay.asDriver() }
+    var albumIds: Driver<[Int]> { albumIdsRelay.asDriver() }
     
     // MARK: - Init
     init(profileUsecase: ProfileUseCaseProtocol = ProfileUseCase()) {
@@ -49,6 +52,7 @@ final class ProfileViewModel: ProfileViewModelProtocol {
             .subscribe(onSuccess: { [weak self] (user, albums) in
                 self?.userInfoRelay.accept((user.name ?? "", user.address?.formatted ?? ""))
                 self?.albumsRelay.accept(albums.map { $0.title })
+                self?.albumIdsRelay.accept(albums.map { $0.id })
                 self?.loadingRelay.accept(false)
             }, onFailure: { [weak self] error in
                 self?.loadingRelay.accept(false)

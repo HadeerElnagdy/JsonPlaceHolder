@@ -1,14 +1,7 @@
-//
-//  ProfileHeaderView.swift
-//  JsonPlaceHolder
-//
-//  Created by Hadeer on 09.09.25.
-//
-
 import UIKit
 import SnapKit
 
-final class ProfileHeaderView: UIView {
+class ProfileHeaderView: UIView {
     
     // MARK: - Constants
     private enum Constants {
@@ -19,8 +12,6 @@ final class ProfileHeaderView: UIView {
         static let nameToAddressSpacing: CGFloat = 2
         static let nameFontSize: CGFloat = 18
         static let addressFontSize: CGFloat = 14
-        static let defaultName = "Loading..."
-        static let defaultAddress = "Please wait..."
         static let fallbackName = "Unknown"
         static let fallbackAddress = "Not Defined"
     }
@@ -28,12 +19,10 @@ final class ProfileHeaderView: UIView {
     // MARK: - UI Components
     private lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "person.circle.fill")
-        imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .systemGray
-        imageView.backgroundColor = .systemGray6
+        imageView.backgroundColor = .systemGray5
         imageView.layer.cornerRadius = Constants.profileImageSize / 2
         imageView.clipsToBounds = true
+        imageView.contentMode = .scaleAspectFill
         return imageView
     }()
     
@@ -42,7 +31,7 @@ final class ProfileHeaderView: UIView {
         label.font = .boldSystemFont(ofSize: Constants.nameFontSize)
         label.textColor = .label
         label.numberOfLines = 1
-        label.text = "" 
+        label.text = ""
         return label
     }()
     
@@ -52,8 +41,7 @@ final class ProfileHeaderView: UIView {
         label.textColor = .secondaryLabel
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
-        label.lineSpacing = 2.0 // Add line spacing for better readability
-        label.text = "" 
+        label.text = ""
         return label
     }()
     
@@ -67,31 +55,27 @@ final class ProfileHeaderView: UIView {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
-        updateContent(name: Constants.fallbackName, address: Constants.fallbackAddress)
     }
     
     // MARK: - Setup
     private func setupViews() {
-        backgroundColor = .clear
-        
         addSubview(profileImageView)
         addSubview(nameLabel)
         addSubview(addressLabel)
-        
         setupConstraints()
     }
     
     private func setupConstraints() {
         profileImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(Constants.horizontalPadding)
-            make.centerY.equalToSuperview()
+            make.top.equalToSuperview().offset(Constants.verticalPadding)
             make.size.equalTo(Constants.profileImageSize)
         }
         
         nameLabel.snp.makeConstraints { make in
-            make.top.equalTo(profileImageView.snp.top)
             make.leading.equalTo(profileImageView.snp.trailing).offset(Constants.imageToTextSpacing)
             make.trailing.equalToSuperview().inset(Constants.horizontalPadding)
+            make.top.equalTo(profileImageView.snp.top)
         }
         
         addressLabel.snp.makeConstraints { make in
@@ -106,23 +90,15 @@ final class ProfileHeaderView: UIView {
     func updateContent(name: String, address: String) {
         nameLabel.text = name.isEmpty ? Constants.fallbackName : name
         addressLabel.text = address.isEmpty ? Constants.fallbackAddress : address
-        
-        // Trigger layout update if needed
-        setNeedsLayout()
-        layoutIfNeeded()
     }
     
-    // MARK: - Intrinsic Content Size
     override var intrinsicContentSize: CGSize {
-        let imageHeight = Constants.profileImageSize
-        let textHeight = nameLabel.intrinsicContentSize.height + 
+        let width = UIScreen.main.bounds.width - (Constants.horizontalPadding * 2)
+        let height = max(Constants.profileImageSize + (Constants.verticalPadding * 2), 
+                        nameLabel.intrinsicContentSize.height + 
                         addressLabel.intrinsicContentSize.height + 
-                        Constants.nameToAddressSpacing
-        let contentHeight = max(imageHeight, textHeight)
-        
-        return CGSize(
-            width: UIView.noIntrinsicMetric,
-            height: contentHeight + (Constants.verticalPadding * 2)
-        )
+                        Constants.nameToAddressSpacing + 
+                        (Constants.verticalPadding * 2))
+        return CGSize(width: width, height: height)
     }
 }

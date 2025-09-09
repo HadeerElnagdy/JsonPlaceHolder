@@ -28,6 +28,7 @@ final class ProfileTableViewController: UITableViewController {
     private let viewModel: ProfileViewModelProtocol
     private let disposeBag = DisposeBag()
     private var albums: [String] = []
+    private var albumIds: [Int] = []
     
     // MARK: - UI Components
     private lazy var activityIndicator: UIActivityIndicatorView = {
@@ -155,6 +156,13 @@ final class ProfileTableViewController: UITableViewController {
                 self?.tableView.reloadData()
             })
             .disposed(by: disposeBag)
+        
+        // Album IDs binding
+        viewModel.albumIds
+            .drive(onNext: { [weak self] albumIds in
+                self?.albumIds = albumIds
+            })
+            .disposed(by: disposeBag)
     }
     
     // MARK: - Header Management
@@ -202,5 +210,15 @@ final class ProfileTableViewController: UITableViewController {
         cell.textLabel?.text = albums[indexPath.row]
         cell.accessoryType = .disclosureIndicator
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        guard indexPath.row < albumIds.count else { return }
+        
+        let albumId = albumIds[indexPath.row]
+        let albumDetailsVC = AlbumDetailsViewController(albumId: albumId)
+        navigationController?.pushViewController(albumDetailsVC, animated: true)
     }
 }
