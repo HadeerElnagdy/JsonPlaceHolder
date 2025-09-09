@@ -7,11 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		520C38C32E7089F900E1472D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 520C38C22E7089F900E1472D /* Kingfisher */; };
 		52344C512E6F4DDD001ACF31 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 52344C502E6F4DDD001ACF31 /* CombineMoya */; };
 		52344C532E6F4DDD001ACF31 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 52344C522E6F4DDD001ACF31 /* Moya */; };
 		52344C552E6F4DDD001ACF31 /* ReactiveMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 52344C542E6F4DDD001ACF31 /* ReactiveMoya */; };
 		52344C572E6F4DDD001ACF31 /* RxMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 52344C562E6F4DDD001ACF31 /* RxMoya */; };
 		52344C5E2E6F6142001ACF31 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52344C5D2E6F6142001ACF31 /* SnapKit */; };
+		52344CB12E702D19001ACF31 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 52344CB02E702D19001ACF31 /* RxCocoa */; };
+		52344CB32E702D19001ACF31 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 52344CB22E702D19001ACF31 /* RxRelay */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,8 +89,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52344CB12E702D19001ACF31 /* RxCocoa in Frameworks */,
 				52344C532E6F4DDD001ACF31 /* Moya in Frameworks */,
+				52344CB32E702D19001ACF31 /* RxRelay in Frameworks */,
 				52344C512E6F4DDD001ACF31 /* CombineMoya in Frameworks */,
+				520C38C32E7089F900E1472D /* Kingfisher in Frameworks */,
 				52344C572E6F4DDD001ACF31 /* RxMoya in Frameworks */,
 				52344C552E6F4DDD001ACF31 /* ReactiveMoya in Frameworks */,
 				52344C5E2E6F6142001ACF31 /* SnapKit in Frameworks */,
@@ -157,6 +163,9 @@
 				52344C542E6F4DDD001ACF31 /* ReactiveMoya */,
 				52344C562E6F4DDD001ACF31 /* RxMoya */,
 				52344C5D2E6F6142001ACF31 /* SnapKit */,
+				52344CB02E702D19001ACF31 /* RxCocoa */,
+				52344CB22E702D19001ACF31 /* RxRelay */,
+				520C38C22E7089F900E1472D /* Kingfisher */,
 			);
 			productName = JsonPlaceHolder;
 			productReference = 52344BF72E6F492F001ACF31 /* JsonPlaceHolder.app */;
@@ -243,6 +252,8 @@
 			packageReferences = (
 				52344C4F2E6F4DDD001ACF31 /* XCRemoteSwiftPackageReference "Moya" */,
 				52344C5C2E6F6142001ACF31 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				52344CAF2E702D19001ACF31 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				520C38C12E7089F900E1472D /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 52344BF82E6F492F001ACF31 /* Products */;
@@ -330,7 +341,7 @@
 				INFOPLIST_FILE = JsonPlaceHolder/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 13;
@@ -359,7 +370,7 @@
 				INFOPLIST_FILE = JsonPlaceHolder/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 13;
@@ -611,6 +622,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		520C38C12E7089F900E1472D /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.5.0;
+			};
+		};
 		52344C4F2E6F4DDD001ACF31 /* XCRemoteSwiftPackageReference "Moya" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Moya/Moya";
@@ -627,9 +646,22 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		52344CAF2E702D19001ACF31 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.9.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		520C38C22E7089F900E1472D /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 520C38C12E7089F900E1472D /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
 		52344C502E6F4DDD001ACF31 /* CombineMoya */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 52344C4F2E6F4DDD001ACF31 /* XCRemoteSwiftPackageReference "Moya" */;
@@ -654,6 +686,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 52344C5C2E6F6142001ACF31 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		52344CB02E702D19001ACF31 /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52344CAF2E702D19001ACF31 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		52344CB22E702D19001ACF31 /* RxRelay */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52344CAF2E702D19001ACF31 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxRelay;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
