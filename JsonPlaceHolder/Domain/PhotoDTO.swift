@@ -14,14 +14,15 @@ struct Photo: Codable {
     let url: String
     let thumbnailUrl: String
     
-    // Computed properties for Picsum Photos API
+    //Workaround
+    // Computed properties for Picsum Photos API as the actual API pics urls are not valid
     var picsumUrl: String {
-        let validId = ((id - 1) % 1000) + 1 // Ensure ID is between 1-1000
-        return "https://picsum.photos/id/\(validId)/800/600"
+        let validId = ((id - 1) % 1000) + 1
+        return "\(Constants.API.picsumBaseURL)/id/\(validId)/\(Int(Constants.ImageViewer.imageSize.width))/\(Int(Constants.ImageViewer.imageSize.height))"
     }
     
     var picsumThumbnailUrl: String {
-        let validId = ((id - 1) % 1000) + 1 // Ensure ID is between 1-1000
-        return "https://picsum.photos/id/\(validId)/300/300"
+        let validId = ((id - 1) % 1000) + 1
+        return "\(Constants.API.picsumBaseURL)/id/\(validId)/\(Int(Constants.ImageViewer.thumbnailSize.width))/\(Int(Constants.ImageViewer.thumbnailSize.height))"
     }
 }

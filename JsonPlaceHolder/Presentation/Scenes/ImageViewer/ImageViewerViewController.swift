@@ -11,15 +11,6 @@ import Kingfisher
 
 final class ImageViewerViewController: UIViewController {
     
-    // MARK: - Constants
-    private enum Constants {
-        static let minimumZoomScale: CGFloat = 0.5
-        static let maximumZoomScale: CGFloat = 3.0
-        static let doubleTapZoomScale: CGFloat = 2.0
-        static let animationDuration: TimeInterval = 0.3
-        static let toolbarHeight: CGFloat = 44
-        static let safeAreaPadding: CGFloat = 16
-    }
     
     // MARK: - Properties
     private let photo: Photo
@@ -71,8 +62,8 @@ final class ImageViewerViewController: UIViewController {
         imageView.isUserInteractionEnabled = true
         
         imageView.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview()
-            // Width and height will be set programmatically based on image size
+            make.leading.trailing.equalToSuperview()
+            make.centerY.equalToSuperview()
         }
         
         // Setup toolbar
@@ -84,8 +75,8 @@ final class ImageViewerViewController: UIViewController {
     
     private func setupScrollView() {
         scrollView.delegate = self
-        scrollView.minimumZoomScale = Constants.minimumZoomScale
-        scrollView.maximumZoomScale = Constants.maximumZoomScale
+        scrollView.minimumZoomScale = Constants.ImageViewer.minimumZoomScale
+        scrollView.maximumZoomScale = Constants.ImageViewer.maximumZoomScale
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.bouncesZoom = true
@@ -97,15 +88,15 @@ final class ImageViewerViewController: UIViewController {
         toolbar.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(view.safeAreaLayoutGuide)
-            make.height.equalTo(Constants.toolbarHeight)
+            make.height.equalTo(Constants.UI.toolbarHeight)
         }
         
         // Setup toolbar items
-        closeButton.image = UIImage(systemName: "xmark")
+        closeButton.image = UIImage(systemName: Constants.SystemImages.closeIcon)
         closeButton.target = self
         closeButton.action = #selector(closeButtonTapped)
         
-        shareButton.image = UIImage(systemName: "square.and.arrow.up")
+        shareButton.image = UIImage(systemName: Constants.SystemImages.shareIcon)
         shareButton.target = self
         shareButton.action = #selector(shareButtonTapped)
         
@@ -141,9 +132,9 @@ final class ImageViewerViewController: UIViewController {
             
             imageView.kf.setImage(
                 with: imageURL,
-                placeholder: UIImage(systemName: "photo"),
+                placeholder: UIImage(systemName: Constants.SystemImages.photoPlaceholder),
                 options: [
-                    .transition(.fade(0.3)),
+                    .transition(.fade(Constants.UI.fadeTransitionDuration)),
                     .cacheOriginalImage
                 ]
             ) { [weak self] result in
@@ -168,7 +159,7 @@ final class ImageViewerViewController: UIViewController {
         let minScale = min(widthScale, heightScale)
         
         scrollView.minimumZoomScale = minScale
-        scrollView.maximumZoomScale = Constants.maximumZoomScale
+        scrollView.maximumZoomScale = Constants.ImageViewer.maximumZoomScale
         scrollView.zoomScale = minScale
         
         // Set the image view frame to the image size
@@ -208,7 +199,7 @@ final class ImageViewerViewController: UIViewController {
             scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
         } else {
             // Zoom in
-            let zoomScale = Constants.doubleTapZoomScale
+            let zoomScale = Constants.ImageViewer.doubleTapZoomScale
             let zoomRect = zoomRectForScale(zoomScale, center: gesture.location(in: gesture.view))
             scrollView.zoom(to: zoomRect, animated: true)
         }
@@ -216,7 +207,7 @@ final class ImageViewerViewController: UIViewController {
     
     @objc private func handleSingleTap(_ gesture: UITapGestureRecognizer) {
         let isHidden = toolbar.isHidden
-        UIView.animate(withDuration: Constants.animationDuration) {
+        UIView.animate(withDuration: Constants.UI.animationDuration) {
             self.toolbar.alpha = isHidden ? 1.0 : 0.0
         } completion: { _ in
             self.toolbar.isHidden = !isHidden

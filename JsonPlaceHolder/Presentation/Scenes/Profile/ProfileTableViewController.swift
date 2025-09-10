@@ -12,49 +12,42 @@ import RxCocoa
 
 final class ProfileTableViewController: UITableViewController {
     
-    // MARK: - Constants
-    private enum Constants {
-        static let cellIdentifier = "AlbumCell"
-        static let headerCornerRadius: CGFloat = 12
-        static let headerHorizontalMargin: CGFloat = 16
-        static let headerVerticalMargin: CGFloat = 8
-        static let headerContentPadding: CGFloat = 12
-        static let shadowOpacity: Float = 0.1
-        static let shadowRadius: CGFloat = 4
-        static let shadowOffset = CGSize(width: 0, height: 2)
-    }
     
     // MARK: - Properties
     private let viewModel: ProfileViewModelProtocol
     private let disposeBag = DisposeBag()
     private var albums: [String] = []
     private var albumIds: [Int] = []
+    private var errorMessage: String?
     
     // MARK: - UI Components
     private lazy var activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.hidesWhenStopped = true
+        indicator.color = .systemBlue
+        indicator.backgroundColor = UIColor.systemBackground.withAlphaComponent(Constants.UI.activityIndicatorAlpha)
+        indicator.layer.cornerRadius = Constants.UI.activityIndicatorCornerRadius
+        indicator.layer.masksToBounds = true
         return indicator
     }()
     
     private lazy var headerContainer: UIView = {
         let container = UIView()
         container.backgroundColor = .systemBackground
-        container.layer.cornerRadius = Constants.headerCornerRadius
+        container.layer.cornerRadius = Constants.ProfileTableView.headerCornerRadius
         container.layer.masksToBounds = true
         
-        // Add subtle shadow
         container.layer.shadowColor = UIColor.black.cgColor
-        container.layer.shadowOffset = Constants.shadowOffset
-        container.layer.shadowRadius = Constants.shadowRadius
-        container.layer.shadowOpacity = Constants.shadowOpacity
+        container.layer.shadowOffset = Constants.ProfileTableView.shadowOffset
+        container.layer.shadowRadius = Constants.ProfileTableView.shadowRadius
+        container.layer.shadowOpacity = Constants.ProfileTableView.shadowOpacity
         container.layer.masksToBounds = false
         
         return container
     }()
     
     private lazy var profileHeaderView: ProfileHeaderView = {
-        return ProfileHeaderView(name: "", address: "") 
+        return ProfileHeaderView(name: Constants.UIStrings.emptyString, address: Constants.UIStrings.emptyString) 
     }()
     
     // MARK: - Initialization
@@ -73,55 +66,62 @@ final class ProfileTableViewController: UITableViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
+        
+        activityIndicator.startAnimating()
+        activityIndicator.isHidden = false
+        
         viewModel.loadProfile()
     }
     
     // MARK: - UI Setup
     private func setupUI() {
-        title = "Profile"
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.cellIdentifier)
+        title = Constants.UIStrings.profileTitle
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: Constants.ProfileTableView.cellIdentifier)
         
-        // Setup activity indicator
-        view.addSubview(activityIndicator)
-        activityIndicator.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+        if let navController = navigationController {
+            navController.view.addSubview(activityIndicator)
+            activityIndicator.snp.makeConstraints { make in
+                make.center.equalToSuperview()
+                make.width.height.equalTo(Constants.UI.activityIndicatorSize)
+            }
+        } else {
+            view.addSubview(activityIndicator)
+            activityIndicator.snp.makeConstraints { make in
+                make.center.equalToSuperview()
+                make.width.height.equalTo(Constants.UI.activityIndicatorSize)
+            }
         }
     }
     
     private func setupHeader() {
         headerContainer.addSubview(profileHeaderView)
         
-        // Setup header constraints with proper padding
         profileHeaderView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(16)
-            make.leading.equalToSuperview().offset(16)
-            make.trailing.equalToSuperview().offset(-16)
-            make.bottom.equalToSuperview().offset(-16)
+            make.top.equalToSuperview().offset(Constants.UI.headerPadding)
+            make.leading.equalToSuperview().offset(Constants.UI.headerPadding)
+            make.trailing.equalToSuperview().offset(-Constants.UI.headerPadding)
+            make.bottom.equalToSuperview().offset(-Constants.UI.headerPadding)
         }
         
-        let headerWidth = view.bounds.width - (Constants.headerHorizontalMargin * 2)
+        let headerWidth = view.bounds.width - (Constants.ProfileTableView.headerHorizontalMargin * 2)
         let headerHeight = calculateHeaderHeight()
         
-        // Set container frame
         headerContainer.frame = CGRect(
-            x: Constants.headerHorizontalMargin,
+            x: Constants.ProfileTableView.headerHorizontalMargin,
             y: 0,
             width: headerWidth,
             height: headerHeight
         )
         
-        // Set as table header
         tableView.tableHeaderView = headerContainer
     }
     
     private func calculateHeaderHeight() -> CGFloat {
-        // Calculate dynamic height based on content
-        let profileImageHeight = 50.0 // ProfileHeaderView Constants.profileImageSize
-        let verticalPadding = 16.0 * 2 // top + bottom padding
-        let nameHeight = 22.0 // Approximate height for name label
-        let nameToAddressSpacing = 2.0 // Constants.nameToAddressSpacing
-        let addressHeight = 60.0 // Increased space for address (can wrap to multiple lines)
+        let profileImageHeight = Constants.ProfileHeader.profileImageSize
+        let verticalPadding = Constants.UI.headerPadding * Constants.UI.verticalPaddingMultiplier
+        let nameHeight = Constants.UI.nameLabelHeight
+        let nameToAddressSpacing = Constants.ProfileHeader.nameToAddressSpacing
+        let addressHeight = Constants.UI.addressLabelHeight
         
         let totalHeight = max(profileImageHeight, nameHeight + nameToAddressSpacing + addressHeight) + verticalPadding
         return totalHeight
@@ -129,27 +129,36 @@ final class ProfileTableViewController: UITableViewController {
     
     // MARK: - View Model Binding
     private func bindViewModel() {
-        // Loading state binding
         viewModel.isLoading
-            .drive(activityIndicator.rx.isAnimating)
+            .drive(onNext: { [weak self] isLoading in
+                guard let self = self else { return }
+                if isLoading {
+                    if let navController = self.navigationController {
+                        navController.view.bringSubviewToFront(self.activityIndicator)
+                    } else {
+                        self.view.bringSubviewToFront(self.activityIndicator)
+                    }
+                    self.activityIndicator.startAnimating()
+                    self.activityIndicator.isHidden = false
+                } else {
+                    self.activityIndicator.stopAnimating()
+                    self.activityIndicator.isHidden = true
+                }
+            })
             .disposed(by: disposeBag)
 
-        // User info binding - setup header only when data is available
         viewModel.userInfo
             .drive(onNext: { [weak self] info in
                 guard let self = self else { return }
                 
-                // Setup header only if it hasn't been set up yet
                 if self.tableView.tableHeaderView == nil {
                     self.setupHeader()
                 }
                 
-                // Update header content with actual data
                 self.updateHeaderContent(name: info.name, address: info.address)
             })
             .disposed(by: disposeBag)
         
-        // Albums binding
         viewModel.albums
             .drive(onNext: { [weak self] albums in
                 self?.albums = albums
@@ -157,10 +166,24 @@ final class ProfileTableViewController: UITableViewController {
             })
             .disposed(by: disposeBag)
         
-        // Album IDs binding
         viewModel.albumIds
             .drive(onNext: { [weak self] albumIds in
                 self?.albumIds = albumIds
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.errorMessage
+            .drive(onNext: { [weak self] errorMessage in
+                self?.errorMessage = errorMessage
+                if let errorMessage = errorMessage {
+                    ErrorAlertView.showError(
+                        in: self ?? UIViewController(),
+                        message: errorMessage,
+                        retryAction: { [weak self] in
+                            self?.viewModel.loadProfile()
+                        }
+                    )
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -174,20 +197,16 @@ final class ProfileTableViewController: UITableViewController {
     private func updateHeaderSize() {
         guard let headerView = tableView.tableHeaderView else { return }
         
-        // Force layout update
         headerView.setNeedsLayout()
         headerView.layoutIfNeeded()
         
-        // Calculate new height
         let newHeight = calculateHeaderHeight()
         
-        // Update frame if height changed
-        if abs(headerView.frame.height - newHeight) > 0.1 {
+        if abs(headerView.frame.height - newHeight) > Constants.UI.headerHeightTolerance {
             var frame = headerView.frame
             frame.size.height = newHeight
             headerView.frame = frame
             
-            // Reassign to trigger layout update
             tableView.tableHeaderView = headerView
         }
     }
@@ -198,7 +217,7 @@ final class ProfileTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "My Albums"
+        return Constants.UIStrings.myAlbumsTitle
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -206,7 +225,7 @@ final class ProfileTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.ProfileTableView.cellIdentifier, for: indexPath)
         cell.textLabel?.text = albums[indexPath.row]
         cell.accessoryType = .disclosureIndicator
         return cell
@@ -221,4 +240,5 @@ final class ProfileTableViewController: UITableViewController {
         let albumDetailsVC = AlbumDetailsViewController(albumId: albumId)
         navigationController?.pushViewController(albumDetailsVC, animated: true)
     }
+    
 }

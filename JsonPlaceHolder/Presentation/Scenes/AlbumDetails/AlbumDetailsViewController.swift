@@ -12,15 +12,7 @@ import RxCocoa
 import Kingfisher
 
 final class AlbumDetailsViewController: UIViewController {
-    
-    // MARK: - Constants
-    private enum Constants {
-        static let cellIdentifier = "PhotoCell"
-        static let itemsPerRow: CGFloat = 3
-        static let cellSpacing: CGFloat = 2
-        static let searchBarHeight: CGFloat = 44
-        static let searchBarPadding: CGFloat = 16
-    }
+
     
     // MARK: - Properties
     private let viewModel: AlbumDetailsViewModelProtocol
@@ -31,7 +23,7 @@ final class AlbumDetailsViewController: UIViewController {
     // MARK: - UI Components
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Search photos..."
+        searchBar.placeholder = Constants.UIStrings.searchPlaceholder
         searchBar.searchBarStyle = .minimal
         searchBar.delegate = self
         return searchBar
@@ -39,14 +31,14 @@ final class AlbumDetailsViewController: UIViewController {
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        layout.minimumInteritemSpacing = Constants.cellSpacing
-        layout.minimumLineSpacing = Constants.cellSpacing
+        layout.minimumInteritemSpacing = Constants.AlbumDetails.cellSpacing
+        layout.minimumLineSpacing = Constants.AlbumDetails.cellSpacing
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .systemBackground
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.register(PhotoCell.self, forCellWithReuseIdentifier: Constants.cellIdentifier)
+        collectionView.register(PhotoCell.self, forCellWithReuseIdentifier: Constants.AlbumDetails.cellIdentifier)
         return collectionView
     }()
     
@@ -58,10 +50,10 @@ final class AlbumDetailsViewController: UIViewController {
     
     private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "No photos found"
+        label.text = Constants.UIStrings.noPhotosFound
         label.textColor = .secondaryLabel
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: 16)
+        label.font = .systemFont(ofSize: Constants.AlbumDetails.emptyStateFontSize)
         label.isHidden = true
         return label
     }()
@@ -87,7 +79,7 @@ final class AlbumDetailsViewController: UIViewController {
     // MARK: - UI Setup
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        title = "Album Photos"
+        title = Constants.UIStrings.albumPhotosTitle
         
         view.addSubview(searchBar)
         view.addSubview(collectionView)
@@ -100,12 +92,12 @@ final class AlbumDetailsViewController: UIViewController {
     private func setupConstraints() {
         searchBar.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
-            make.leading.trailing.equalToSuperview().inset(Constants.searchBarPadding)
-            make.height.equalTo(Constants.searchBarHeight)
+            make.leading.trailing.equalToSuperview().inset(Constants.AlbumDetails.searchBarPadding)
+            make.height.equalTo(Constants.AlbumDetails.searchBarHeight)
         }
         
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(searchBar.snp.bottom).offset(8)
+            make.top.equalTo(searchBar.snp.bottom).offset(Constants.AlbumDetails.collectionViewTopOffset)
             make.leading.trailing.bottom.equalToSuperview()
         }
         
@@ -120,12 +112,10 @@ final class AlbumDetailsViewController: UIViewController {
     
     // MARK: - Binding
     private func bindViewModel() {
-        // Loading state
         viewModel.isLoading
             .drive(activityIndicator.rx.isAnimating)
             .disposed(by: disposeBag)
         
-        // Photos binding
         viewModel.filteredPhotos
             .drive(onNext: { [weak self] photos in
                 self?.filteredPhotos = photos
@@ -134,7 +124,20 @@ final class AlbumDetailsViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        // Search text binding
+        viewModel.errorMessage
+            .drive(onNext: { [weak self] errorMessage in
+                if let errorMessage = errorMessage {
+                    ErrorAlertView.showError(
+                        in: self ?? UIViewController(),
+                        message: errorMessage,
+                        retryAction: { [weak self] in
+                            self?.viewModel.loadPhotos(albumId: self?.viewModel.albumId ?? 0)
+                        }
+                    )
+                }
+            })
+            .disposed(by: disposeBag)
+        
         searchBar.rx.text
             .orEmpty
             .bind(to: viewModel.searchText)
@@ -153,7 +156,7 @@ extension AlbumDetailsViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.cellIdentifier, for: indexPath) as! PhotoCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.AlbumDetails.cellIdentifier, for: indexPath) as! PhotoCell
         let photo = filteredPhotos[indexPath.item]
         cell.configure(with: photo)
         return cell
@@ -179,9 +182,9 @@ extension AlbumDetailsViewController: UICollectionViewDelegate {
 // MARK: - UICollectionViewDelegateFlowLayout
 extension AlbumDetailsViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let totalSpacing = Constants.cellSpacing * (Constants.itemsPerRow - 1)
+        let totalSpacing = Constants.AlbumDetails.cellSpacing * (Constants.AlbumDetails.itemsPerRow - 1)
         let availableWidth = collectionView.frame.width - totalSpacing
-        let cellWidth = availableWidth / Constants.itemsPerRow
+        let cellWidth = availableWidth / Constants.AlbumDetails.itemsPerRow
         return CGSize(width: cellWidth, height: cellWidth)
     }
 }
@@ -213,7 +216,7 @@ class PhotoCell: UICollectionViewCell {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 12)
+        label.font = .systemFont(ofSize: Constants.AlbumDetails.titleLabelFontSize)
         label.textColor = .label
         label.numberOfLines = 2
         label.textAlignment = .center
@@ -239,8 +242,8 @@ class PhotoCell: UICollectionViewCell {
         }
         
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(imageView.snp.bottom).offset(4)
-            make.leading.trailing.bottom.equalToSuperview().inset(2)
+            make.top.equalTo(imageView.snp.bottom).offset(Constants.AlbumDetails.titleLabelTopOffset)
+            make.leading.trailing.bottom.equalToSuperview().inset(Constants.AlbumDetails.titleLabelHorizontalInset)
         }
     }
     
