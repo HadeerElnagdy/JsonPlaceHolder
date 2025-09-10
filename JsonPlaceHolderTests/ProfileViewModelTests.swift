@@ -11,13 +11,13 @@ import RxSwift
 
 final class ProfileViewModelTests: XCTestCase {
     
-    var viewModel: ProfileViewModel!
-    var mockUseCase: MockProfileUseCase!
-    var disposeBag: DisposeBag!
+    var viewModel: ProfileViewModel?
+    var mockUseCase: MockProfileUseCase?
+    var disposeBag: DisposeBag?
     
     override func setUpWithError() throws {
         mockUseCase = MockProfileUseCase()
-        viewModel = ProfileViewModel(profileUsecase: mockUseCase)
+        viewModel = ProfileViewModel(profileUsecase: mockUseCase!)
         disposeBag = DisposeBag()
     }
     
@@ -27,8 +27,12 @@ final class ProfileViewModelTests: XCTestCase {
         disposeBag = nil
     }
     
-    func testInitialState() {
-        // Given & When
+    func testInitialState() throws {
+        // Given
+        let viewModel = try XCTUnwrap(self.viewModel)
+        let disposeBag = try XCTUnwrap(self.disposeBag)
+        
+        // When
         var userInfo: (String, String) = (Constants.UIStrings.emptyString, Constants.UIStrings.emptyString)
         var albums: [String] = []
         var albumIds: [Int] = []
@@ -50,8 +54,11 @@ final class ProfileViewModelTests: XCTestCase {
         XCTAssertNil(errorMessage)
     }
     
-    func testLoadProfileSuccess() {
+    func testLoadProfileSuccess() throws {
         // Given
+        let viewModel = try XCTUnwrap(self.viewModel)
+        let mockUseCase = try XCTUnwrap(self.mockUseCase)
+        
         let mockUser = User(
             id: 1,
             name: Constants.TestData.testName,
@@ -85,8 +92,11 @@ final class ProfileViewModelTests: XCTestCase {
         XCTAssertEqual(mockUseCase.lastExecution, .getAlbums(userId: 1))
     }
     
-    func testLoadProfileFailure() {
+    func testLoadProfileFailure() throws {
         // Given
+        let viewModel = try XCTUnwrap(self.viewModel)
+        let mockUseCase = try XCTUnwrap(self.mockUseCase)
+        
         mockUseCase.userResult = .error(AppError.networkError(NSError(domain: Constants.ErrorDomains.testError, code: -1, userInfo: nil)))
         
         // When
@@ -97,8 +107,11 @@ final class ProfileViewModelTests: XCTestCase {
         XCTAssertEqual(mockUseCase.lastExecution, .getUser)
     }
     
-    func testLoadProfileWithInvalidUserId() {
+    func testLoadProfileWithInvalidUserId() throws {
         // Given
+        let viewModel = try XCTUnwrap(self.viewModel)
+        let mockUseCase = try XCTUnwrap(self.mockUseCase)
+        
         let mockUser = User(
             id: nil,
             name: Constants.TestData.testName,
@@ -120,8 +133,11 @@ final class ProfileViewModelTests: XCTestCase {
         XCTAssertEqual(mockUseCase.lastExecution, .getUser)
     }
     
-    func testLoadingState() {
+    func testLoadingState() throws {
         // Given
+        let viewModel = try XCTUnwrap(self.viewModel)
+        let mockUseCase = try XCTUnwrap(self.mockUseCase)
+        
         mockUseCase.userResult = .error(AppError.networkError(NSError(domain: Constants.ErrorDomains.testError, code: -1, userInfo: nil)))
         
         // When

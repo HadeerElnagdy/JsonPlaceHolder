@@ -26,8 +26,7 @@ final class ProfileUseCase: ProfileUseCaseProtocol {
         switch execution {
         case .getUser:
             return userRepository.getUsers()
-                .map { [weak self] users -> User in
-                    guard let self = self else { throw AppError.unknown(NSError()) }
+                .map { users -> User in
                     guard let randomUser = users.randomElement() else {
                         throw AppError.noUsersFound
                     }

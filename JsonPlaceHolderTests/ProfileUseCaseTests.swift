@@ -11,13 +11,13 @@ import RxSwift
 
 final class ProfileUseCaseTests: XCTestCase {
     
-    var useCase: ProfileUseCase!
-    var mockRepository: MockProfileRepository!
-    var disposeBag: DisposeBag!
+    var useCase: ProfileUseCase?
+    var mockRepository: MockProfileRepository?
+    var disposeBag: DisposeBag?
     
     override func setUpWithError() throws {
         mockRepository = MockProfileRepository()
-        useCase = ProfileUseCase(repo: mockRepository)
+        useCase = ProfileUseCase(repo: mockRepository!)
         disposeBag = DisposeBag()
     }
     
@@ -27,8 +27,11 @@ final class ProfileUseCaseTests: XCTestCase {
         disposeBag = nil
     }
     
-    func testGetUserSuccess() {
+    func testGetUserSuccess() throws {
         // Given
+        let useCase = try XCTUnwrap(self.useCase)
+        let mockRepository = try XCTUnwrap(self.mockRepository)
+        
         let mockUsers = [
             User(id: Constants.TestData.testUserId, name: Constants.TestData.testName, username: Constants.TestData.testUsername, email: Constants.TestData.testEmail, address: nil, phone: nil, website: nil, company: nil),
             User(id: Constants.TestData.testUserId2, name: Constants.TestData.testName2, username: Constants.TestData.testUsername2, email: Constants.TestData.testEmail2, address: nil, phone: nil, website: nil, company: nil)
@@ -42,8 +45,11 @@ final class ProfileUseCaseTests: XCTestCase {
         XCTAssertEqual(mockRepository.getUsersCallCount, 1)
     }
     
-    func testGetUserFailure() {
+    func testGetUserFailure() throws {
         // Given
+        let useCase = try XCTUnwrap(self.useCase)
+        let mockRepository = try XCTUnwrap(self.mockRepository)
+        
         mockRepository.mockUsers = []
         
         // When
@@ -53,8 +59,11 @@ final class ProfileUseCaseTests: XCTestCase {
         XCTAssertEqual(mockRepository.getUsersCallCount, 1)
     }
     
-    func testGetAlbumsSuccess() {
+    func testGetAlbumsSuccess() throws {
         // Given
+        let useCase = try XCTUnwrap(self.useCase)
+        let mockRepository = try XCTUnwrap(self.mockRepository)
+        
         let mockAlbums = [
             Album(userId: 1, id: 1, title: Constants.TestData.testAlbum1Title),
             Album(userId: 1, id: 2, title: Constants.TestData.testAlbum2Title)
@@ -68,8 +77,11 @@ final class ProfileUseCaseTests: XCTestCase {
         XCTAssertEqual(mockRepository.getAlbumsCallCount, 1)
     }
     
-    func testGetAlbumsWithInvalidUserId() {
+    func testGetAlbumsWithInvalidUserId() throws {
         // Given
+        let useCase = try XCTUnwrap(self.useCase)
+        let mockRepository = try XCTUnwrap(self.mockRepository)
+        
         mockRepository.mockAlbums = []
         
         // When
